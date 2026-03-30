@@ -5,6 +5,551 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UMOJA WVJ — Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase Configuration
+    const SUPABASE_URL = 'https://usrslbegigknkookofvr.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_3bSO7Ux9XJZC-zsJ9ly3EA_ipIL0sNJ';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+  <style>
+:root {
+  --bg: #f5f2ec;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --border: #ddd9d0;
+  --primary: #0f5c4a;
+  --primary-light: #e8f5f1;
+  --primary-mid: #1a7a63;
+  --accent: #e8860a;
+  --danger: #c0392b;
+  --danger-light: #fdecea;
+  --text: #1a1a18;
+  --text2: #5a5a52;
+  --text3: #9a9a90;
+  --gold: #c9920a;
+  --paid: #0f5c4a;
+  --paid-bg: #e8f5f1;
+  --partial: #e8860a;
+  --partial-bg: #fef3e2;
+  --unpaid-bg: #f0ede6;
+  --shadow: 0 2px 16px rgba(15,92,74,0.08);
+  --shadow-lg: 0 8px 40px rgba(15,92,74,0.14);
+  --radius: 10px; --radius-lg: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+
+/* Layout */
+.app { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 220px; background: var(--primary); display: flex; flex-direction: column; position: fixed; top:0; left:0; bottom:0; z-index:100; }
+.sidebar-logo { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-logo .org-tag { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+.sidebar-logo h1 { font-size: 15px; font-weight: 800; color: #fff; line-height: 1.2; }
+.sidebar-logo .group-type { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 2px; font-family: 'DM Mono', monospace; }
+nav { padding: 16px 0; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: rgba(255,255,255,0.65); cursor: pointer; font-size: 13px; font-weight: 500; border-left: 3px solid transparent; transition: all 0.15s; user-select: none; }
+.nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left-color: #7ddbbb; }
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 10px; color: rgba(255,255,255,0.3); font-family: 'DM Mono', monospace; }
+
+/* Main */
+.main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top:0; z-index:50; }
+.topbar-title { font-size: 16px; font-weight: 700; }
+.topbar-sub { font-size: 11px; color: var(--text3); margin-top: 1px; font-family: 'DM Mono', monospace; }
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+.content { padding: 24px 28px; flex: 1; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-mid); }
+.btn-export { background: #1d4ed8; color: #fff; }
+.btn-export:hover { background: #1e40af; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--surface2); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* Export dropdown */
+.export-wrap { position: relative; display: inline-block; }
+.export-menu { display: none; position: absolute; right: 0; top: calc(100% + 4px); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-lg); min-width: 160px; z-index: 200; overflow: hidden; }
+.export-menu.open { display: block; }
+.export-item { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.1s; color: var(--text); }
+.export-item:hover { background: var(--surface2); }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+.stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+.stat-card.green::before { background: var(--primary); }
+.stat-card.amber::before { background: var(--accent); }
+.stat-card.blue::before { background: #2563eb; }
+.stat-card.red::before { background: var(--danger); }
+.stat-icon { font-size: 22px; margin-bottom: 10px; }
+.stat-value { font-size: 26px; font-weight: 800; line-height:1; font-family: 'DM Mono', monospace; }
+.stat-label { font-size: 11px; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+.stat-sub { font-size: 11px; color: var(--text2); margin-top: 6px; font-family: 'DM Mono', monospace; }
+
+/* Dashboard */
+.dash-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+.card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; }
+.card-body { padding: 0; }
+.payment-list { list-style: none; }
+.payment-item { display: flex; align-items: center; padding: 11px 20px; border-bottom: 1px solid var(--border); gap: 12px; transition: background 0.1s; }
+.payment-item:last-child { border-bottom: none; }
+.payment-item:hover { background: var(--surface2); }
+.member-avatar { width:32px; height:32px; border-radius:50%; background: var(--primary-light); color: var(--primary); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.payment-name { font-size:13px; font-weight:600; flex:1; }
+.payment-deposit { font-size:12px; font-family:'DM Mono',monospace; color:var(--text2); }
+.status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.dot-paid { background: var(--paid); }
+.dot-partial { background: var(--partial); }
+.dot-unpaid { background: #ddd; }
+
+/* Month progress */
+.month-progress { padding: 14px 20px; }
+.month-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.month-label { font-size:11px; font-weight:600; width:46px; color:var(--text2); flex-shrink:0; }
+.progress-bar { flex:1; height:6px; background:var(--surface2); border-radius:4px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:4px; background:var(--primary); transition:width 0.5s ease; }
+.progress-fill.partial { background: var(--accent); }
+.month-pct { font-size:11px; color:var(--text3); font-family:'DM Mono',monospace; width:30px; text-align:right; }
+
+/* Modal */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,30,25,0.45); backdrop-filter:blur(4px); z-index:1000; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); width:100%; max-width:480px; max-height:90vh; overflow-y:auto; animation:slideUp 0.2s ease; }
+@keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal-title { font-size:16px; font-weight:700; }
+.modal-close { width:28px; height:28px; border-radius:6px; background:var(--surface2); border:none; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; color:var(--text2); }
+.modal-close:hover { background:var(--border); }
+.modal-body { padding:20px 24px; }
+.modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; }
+
+/* Form */
+.form-row { margin-bottom:16px; }
+.form-row label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text3); margin-bottom:6px; }
+.form-row input, .form-row select { width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; color:var(--text); background:var(--surface); outline:none; transition:border-color 0.15s; }
+.form-row input:focus, .form-row select:focus { border-color:var(--primary); }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* Toast */
+.toast { position:fixed; bottom:24px; right:24px; background:var(--text); color:#fff; padding:12px 18px; border-radius:10px; font-size:13px; font-weight:500; box-shadow:var(--shadow-lg); z-index:9999; animation:toastIn 0.25s ease; }
+@keyframes toastIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}}
+@media(max-width:680px){.main{margin-left:0}.content{padding:16px}.topbar{padding:12px 16px}}
+@media print{
+  .sidebar,.topbar-actions{display:none!important}
+  .main{margin-left:0}
+  body{background:#fff}
+}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="org-tag">Mkoba Family · TPB</div>
+        <h1>UMOJA WVJ</h1>
+        <div class="group-type">Group Manager v2.0 · Mar–Feb Cycle</div>
+      </div>
+      <nav>
+        <a class="nav-item active" href="dashboard.html"><span class="icon">📊</span>Dashboard</a>
+        <a class="nav-item" href="members.html"><span class="icon">👥</span>Members</a>
+        <a class="nav-item" href="michango.html"><span class="icon">🎯</span>Matukio</a>
+      </nav>
+      <div class="sidebar-footer">© 2026 UMOJA WVJ GROUP</div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <div class="topbar-title" id="topbar-title">Dashboard</div>
+          <div class="topbar-sub" id="topbar-sub">Overview & summary</div>
+        </div>
+        <div class="topbar-actions">
+          <div class="export-wrap">
+            <button class="btn btn-export btn-sm" onclick="toggleExportMenu()">⬇ Export ▾</button>
+            <div class="export-menu" id="export-menu">
+              <div class="export-item" onclick="exportCSV()">📄 Export CSV</div>
+              <div class="export-item" onclick="exportPrint()">🖨 Print / PDF</div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddMember()">＋ Add Member</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div id="view-dashboard">
+          <div class="stats-grid" id="stats-grid"></div>
+          <div class="dash-grid">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Payment Overview</span>
+                <a href="members.html" class="btn btn-ghost btn-sm">View All →</a>
+              </div>
+              <ul class="payment-list" id="dash-payment-list"></ul>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div class="card">
+                <div class="card-header"><span class="card-title">Monthly Progress (Mar → Feb)</span></div>
+                <div class="month-progress" id="month-progress"></div>
+              </div>
+              <div class="card">
+                <div class="card-header"><span class="card-title">Top Collectors</span></div>
+                <ul class="payment-list" id="top-collectors"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal-overlay" id="modal-member">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-member-title">Add Member</span>
+        <button class="modal-close" onclick="closeModal('modal-member')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-id">
+        <div class="form-grid">
+          <div class="form-row">
+            <label>Full Name</label>
+            <input type="text" id="f-name" placeholder="JOHN DOE">
+          </div>
+          <div class="form-row">
+            <label>Phone Number</label>
+            <input type="text" id="f-phone" placeholder="255XXXXXXXXX">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label>Role</label>
+            <select id="f-role">
+              <option value="MEMBER">Member</option>
+              <option value="CHAIRPERSON">Chairperson</option>
+              <option value="TREASURER">Treasurer</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Total Deposit (TZS)</label>
+            <input type="number" id="f-deposit" placeholder="0" min="0" step="1000">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-member')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveMember()">Save Member</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+// ========== CONSTANTS ==========
+const MONTHS = ['mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb'];
+const MONTH_LABELS = { mar:'Mar', apr:'Apr', may:'May', jun:'Jun', jul:'Jul', aug:'Aug', sep:'Sep', oct:'Oct', nov:'Nov', dec:'Dec', jan:'Jan', feb:'Feb' };
+const PER_PERIOD = 10000;
+
+// ===== SUPABASE FUNCTIONS =====
+
+async function loadMembers() {
+  try {
+    const { data, error } = await supabase
+      .from('members')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error loading members:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (err) {
+    console.error('Error:', err);
+    return [];
+  }
+}
+
+async function loadDeposits(memberId) {
+  try {
+    const { data, error } = await supabase
+      .from('member_deposits')
+      .select('*')
+      .eq('member_id', memberId);
+    
+    if (error) {
+      console.error('Error loading deposits:', error);
+      return {};
+    }
+
+    const result = {};
+    MONTHS.forEach(m => result[m] = 0);
+    (data || []).forEach(d => {
+      result[d.month] = d.amount;
+    });
+    return result;
+  } catch (err) {
+    console.error('Error:', err);
+    return {};
+  }
+}
+
+async function saveDepositsSplit(memberId, depositAmount) {
+  try {
+    // Delete existing deposits
+    await supabase
+      .from('member_deposits')
+      .delete()
+      .eq('member_id', memberId);
+
+    // Calculate split
+    const split = splitDeposit(depositAmount);
+    
+    // Insert new deposits
+    const records = MONTHS
+      .filter(month => split[month] > 0)
+      .map(month => ({
+        member_id: memberId,
+        month,
+        amount: split[month],
+        paid_at: new Date()
+      }));
+
+    if (records.length > 0) {
+      const { error } = await supabase
+        .from('member_deposits')
+        .insert(records);
+
+      if (error) {
+        console.error('Error saving deposits:', error);
+        return false;
+      }
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Error:', err);
+    return false;
+  }
+}
+
+async function saveMember() {
+  const editId = document.getElementById('edit-id').value;
+  const name = document.getElementById('f-name').value.trim().toUpperCase();
+  const phone = document.getElementById('f-phone').value.trim();
+  const role = document.getElementById('f-role').value;
+  const deposit = parseInt(document.getElementById('f-deposit').value) || 0;
+
+  if (!name || !phone) {
+    toast('⚠️ Name and phone required');
+    return;
+  }
+
+  try {
+    if (editId) {
+      // Update existing
+      const { error } = await supabase
+        .from('members')
+        .update({ name, phone, role, total_deposit: deposit, updated_at: new Date() })
+        .eq('id', parseInt(editId));
+      
+      if (error) {
+        console.error('Error updating member:', error);
+        toast('Error updating member');
+        return;
+      }
+
+      await saveDepositsSplit(parseInt(editId), deposit);
+      toast('✅ Member updated');
+    } else {
+      // Insert new
+      const { data, error } = await supabase
+        .from('members')
+        .insert([{ name, phone, role, total_deposit: deposit, type: 'Mkoba Family' }])
+        .select();
+      
+      if (error) {
+        console.error('Error adding member:', error);
+        toast('Error adding member');
+        return;
+      }
+
+      if (data && data.length > 0) {
+        await saveDepositsSplit(data[0].id, deposit);
+      }
+
+      toast('✅ Member added');
+    }
+
+    closeModal('modal-member');
+    resetMemberForm();
+    renderDashboard();
+  } catch (err) {
+    console.error('Error:', err);
+    toast('Error saving member');
+  }
+}
+
+// ===== UI FUNCTIONS =====
+
+function splitDeposit(deposit) {
+  const r = {};
+  MONTHS.forEach(m => r[m] = 0);
+  let rem = Math.max(0, deposit);
+  for (const m of MONTHS) {
+    if (rem <= 0) break;
+    r[m] = Math.min(rem, PER_PERIOD);
+    rem -= r[m];
+  }
+  return r;
+}
+
+function getStatus(amt) {
+  if (amt <= 0) return 'unpaid';
+  if (amt >= PER_PERIOD) return 'paid';
+  return 'partial';
+}
+
+function initials(name) { return name.split(' ').slice(0,2).map(w=>w[0]).join(''); }
+function fmt(n) { return Number(n).toLocaleString(); }
+
+async function renderDashboard() {
+  const members = await loadMembers();
+  
+  const total = members.reduce((s, m) => s + (m.total_deposit || 0), 0);
+  const paid = members.filter(m => (m.total_deposit || 0) >= PER_PERIOD).length;
+  const partial = members.filter(m => (m.total_deposit || 0) > 0 && (m.total_deposit || 0) < PER_PERIOD).length;
+  const unpaid = members.filter(m => (m.total_deposit || 0) === 0).length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card green"><div class="stat-icon">💰</div><div class="stat-value">TZS ${fmt(total)}</div><div class="stat-label">Total Collected</div><div class="stat-sub">${members.length} members</div></div>
+    <div class="stat-card amber"><div class="stat-icon">✅</div><div class="stat-value">${paid}</div><div class="stat-label">Fully Paid (Mar–Feb)</div><div class="stat-sub">12 periods covered</div></div>
+    <div class="stat-card blue"><div class="stat-icon">⏳</div><div class="stat-value">${partial}</div><div class="stat-label">Partial Payments</div><div class="stat-sub">need top-up</div></div>
+    <div class="stat-card red"><div class="stat-icon">❌</div><div class="stat-value">${unpaid}</div><div class="stat-label">Not Paid</div><div class="stat-sub">zero deposit</div></div>
+  `;
+
+  // Load deposits for all members
+  const sorted = await Promise.all(members.sort((a, b) => (b.total_deposit || 0) - (a.total_deposit || 0)).map(async (m) => {
+    const deposits = await loadDeposits(m.id);
+    return { ...m, deposits };
+  }));
+
+  document.getElementById('dash-payment-list').innerHTML = sorted.map(m => {
+    const s = getStatus(m.total_deposit || 0);
+    return `<li class="payment-item"><div class="member-avatar">${initials(m.name)}</div><span class="payment-name">${m.name}</span><span class="payment-deposit">TZS ${fmt(m.total_deposit || 0)}</span><span class="status-dot dot-${s}"></span></li>`;
+  }).join('');
+
+  // Monthly progress
+  const maxExp = members.length * PER_PERIOD;
+  document.getElementById('month-progress').innerHTML = MONTHS.map(mo => {
+    const amt = sorted.reduce((s, m) => s + (m.deposits[mo] || 0), 0);
+    const pct = maxExp > 0 ? Math.round(amt / maxExp * 100) : 0;
+    const cls = pct >= 100 ? '' : pct > 0 ? 'partial' : '';
+    return `<div class="month-row"><span class="month-label">${MONTH_LABELS[mo]}</span><div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div><span class="month-pct">${pct}%</span></div>`;
+  }).join('');
+
+  document.getElementById('top-collectors').innerHTML = sorted.slice(0, 3).map((m, i) => `
+    <li class="payment-item">
+      <div class="member-avatar" style="background:${i === 0 ? '#fef3e2' : i === 1 ? 'var(--surface2)' : 'var(--primary-light)'};color:${i === 0 ? 'var(--gold)' : i === 1 ? 'var(--text2)' : 'var(--primary)'}">${['🥇', '🥈', '🥉'][i]}</div>
+      <span class="payment-name">${m.name}</span>
+      <span class="payment-deposit">TZS ${fmt(m.total_deposit || 0)}</span>
+    </li>`).join('');
+}
+
+function openAddMember() { 
+  resetMemberForm(); 
+  openModal('modal-member'); 
+}
+
+function resetMemberForm() { 
+  document.getElementById('modal-member-title').textContent = 'Add Member';
+  document.getElementById('edit-id').value = '';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-phone').value = '';
+  document.getElementById('f-role').value = 'MEMBER';
+  document.getElementById('f-deposit').value = '';
+}
+
+async function exportCSV() {
+  closeExportMenu();
+  const members = await loadMembers();
+  const sorted = members.sort((a, b) => (b.total_deposit || 0) - (a.total_deposit || 0));
+
+  const membersWithDeposits = await Promise.all(sorted.map(async (m) => {
+    const deposits = await loadDeposits(m.id);
+    return { ...m, deposits };
+  }));
+
+  const headers = ['#', 'Name', 'Phone', 'Role', 'Type', 'Total Deposit (TZS)', ...MONTHS.map(m => MONTH_LABELS[m])];
+  const rows = membersWithDeposits.map((m, i) => [
+    i + 1, m.name, m.phone, m.role, m.type || 'Mkoba Family', m.total_deposit || 0, ...MONTHS.map(mo => m.deposits[mo] || 0)
+  ]);
+
+  const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.setAttribute('href', URL.createObjectURL(blob));
+  link.setAttribute('download', `dashboard-export-${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast('📄 CSV exported');
+}
+
+function exportPrint() {
+  closeExportMenu();
+  window.print();
+}
+
+function toggleExportMenu() { 
+  document.getElementById('export-menu').classList.toggle('open'); 
+}
+
+function closeExportMenu() { 
+  document.getElementById('export-menu').classList.remove('open'); 
+}
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', (e) => {
+    if (e.target === m) closeModal(m.id);
+  });
+});
+
+function openModal(id) { 
+  document.getElementById(id).classList.add('open'); 
+}
+
+function closeModal(id) { 
+  document.getElementById(id).classList.remove('open'); 
+}
+
+let _tt;
+
+function toast(msg) { 
+  const ex = document.querySelector('.toast');
+  if (ex) ex.remove_*
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UMOJA WVJ — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 <script>
   // EDIT THESE with your Supabase details
