@@ -3,6 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Michango Events</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = 'https://usrslbegigknkookofvr.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_KEY_HERE';
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+</script>
+
+<style>
+body {
+  font-family: Arial;
+  background:#f5f5f5;
+  margin:0;
+}
+.header {
+  background:#0f5c4a;
+  color:white;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+}
+.container { padding:20px; }
+.card {
+  background:white;
+  border-radius:10px;
+  padding:15px;
+  margin-bottom:15px;
+}
+.member {
+  display:flex;
+  justify-content:space-between;
+  padding:8px;
+  border-bottom:1px solid #eee;
+  cursor:pointer;
+}
+.paid { color:green; }
+.unpaid { color:red; }
+.btn {
+  background:#0f5c4a;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.stats {
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+.stat {
+  flex:1;
+  background:white;
+  padding:10px;
+  text-align:center;
+  border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h3>Michango Events</h3>
+  <button class="btn" onclick="createEvent()">➕ Event</button>
+</div>
+
+<div class="container">
+
+<div class="stats">
+  <div class="stat">
+    <div id="total-events">0</div>
+    <small>Events</small>
+  </div>
+  <div class="stat">
+    <div id="total-collected">TZS 0</div>
+    <small>Collected</small>
+  </div>
+  <div class="stat">
+    <div id="avg">0%</div>
+    <small>Progress</small>
+  </div>
+</div>
+
+<div id="events"></div>
+
+</div>
+
+<script>
+
+// ===== LOAD =====
+async function loadEvents() {
+  const { data } = await supabaseClient
+    .from('michango_events')
+    .select('*')
+    .order('created_at', { ascending: false });
+  return data || [];
+}
+
+async function loadMembers() {
+  const { data } = await supabaseClient
+    .from('members')
+    .select('*');
+  return data || [];
+}
+
+async function loadPayments(eventId) {
+  const { data } = await supabaseClient
+    .from('michango_payments')
+    .select('*')
+    .eq('event_id', eventId);
+  return data || [];
+}
+
+// ===== CREATE =====
+async function createEvent() {
+  const name = prompt("Event name?");
+  if (!name) return;
+
+  const members = await loadMembers();
+  if (!members.length) return alert("No members");
+
+  const { data } = await supabaseClient
+    .from('michango_events')
+    .insert([{ name, amount_per_member: 10000 }])
+    .select();
+
+  const eventId = data[0].id;
+
+  const payments = members.map(m => ({
+    event_id: eventId,
+    member_id: m.id,
+    paid: false
+  }));
+
+  await supabaseClient
+    .from('michango_payments')
+    .insert(payments);
+
+  render();
+}
+
+// ===== TOGGLE =====
+async function toggle(eventId, memberId, current) {
+  await supabaseClient
+    .from('michango_payments')
+    .update({ paid: !current })
+    .eq('event_id', eventId)
+    .eq('member_id', memberId);
+
+  render();
+}
+
+// ===== RENDER =====
+async function render() {
+  const container = document.getElementById('events');
+  const events = await loadEvents();
+  const members = await loadMembers();
+
+  let totalCollected = 0;
+  let totalProgress = 0;
+
+  container.innerHTML = '';
+
+  for (const ev of events) {
+    const payments = await loadPayments(ev.id);
+
+    const paid = payments.filter(p => p.paid).length;
+    const total = members.length;
+    const percent = total ? Math.round(paid/total*100) : 0;
+
+    totalCollected += paid * ev.amount_per_member;
+    totalProgress += percent;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    let html = `<h3>${ev.name} (${percent}%)</h3>`;
+
+    payments.forEach(p => {
+      const m = members.find(x => x.id === p.member_id);
+      html += `
+        <div class="member" onclick="toggle(${ev.id}, ${p.member_id}, ${p.paid})">
+          <span>${m?.name || 'Unknown'}</span>
+          <span class="${p.paid ? 'paid' : 'unpaid'}">
+            ${p.paid ? '✓' : '✗'}
+          </span>
+        </div>
+      `;
+    });
+
+    card.innerHTML = html;
+    container.appendChild(card);
+  }
+
+  document.getElementById('total-events').textContent = events.length;
+  document.getElementById('total-collected').textContent =
+    'TZS ' + totalCollected.toLocaleString();
+
+  document.getElementById('avg').textContent =
+    events.length ? Math.round(totalProgress/events.length) + '%' : '0%';
+}
+
+// INIT
+render();
+
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Michango Events — Group Contribution Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
