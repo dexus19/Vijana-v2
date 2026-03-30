@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UMOJA WVJ — Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // Supabase Configuration
-    const SUPABASE_URL = 'https://usrslbegigknkookofvr.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_3bSO7Ux9XJZC-zsJ9ly3EA_ipIL0sNJ';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.supabase = supabase;
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Supabase Configuration
+  const SUPABASE_URL = 'https://usrslbegigknkookofvr.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_3bSO7Ux9XJZC-zsJ9ly3EA_ipIL0sNJ';
+  
+  // Create client from the library
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
   <style>
 :root {
   --bg: #f5f2ec;
