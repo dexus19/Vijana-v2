@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Michango Events — Group Contribution Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f2ec;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --border: #ddd9d0;
+  --primary: #0f5c4a;
+  --primary-light: #e8f5f1;
+  --primary-mid: #1a7a63;
+  --accent: #e8860a;
+  --danger: #c0392b;
+  --danger-light: #fdecea;
+  --text: #1a1a18;
+  --text2: #5a5a52;
+  --text3: #9a9a90;
+  --gold: #c9920a;
+  --paid: #0f5c4a;
+  --paid-bg: #e8f5f1;
+  --partial: #e8860a;
+  --partial-bg: #fef3e2;
+  --unpaid-bg: #f0ede6;
+  --shadow: 0 2px 16px rgba(15,92,74,0.08);
+  --shadow-lg: 0 8px 40px rgba(15,92,74,0.14);
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* Layout */
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: var(--primary);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+}
+.sidebar-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.sidebar-logo .org-tag {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 6px;
+}
+.sidebar-logo h1 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+.sidebar-logo .group-type {
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 4px;
+  font-family: 'DM Mono', monospace;
+}
+nav {
+  padding: 24px 0;
+  flex: 1;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+  user-select: none;
+  text-decoration: none;
+}
+.nav-item:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+.nav-item.active {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border-left-color: #7ddbbb;
+}
+.nav-item .icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+.sidebar-footer {
+  padding: 20px 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  font-family: 'DM Mono', monospace;
+}
+
+/* Main Content */
+.main {
+  margin-left: 260px;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.topbar-sub {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 2px;
+  font-family: 'DM Mono', monospace;
+}
+.topbar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.content {
+  padding: 28px 32px;
+  flex: 1;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--primary-mid);
+  transform: translateY(-1px);
+}
+.btn-success {
+  background: #16a34a;
+  color: #fff;
+}
+.btn-success:hover {
+  background: #15803d;
+}
+.btn-warning {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-warning:hover {
+  background: #c97a0a;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  background: var(--surface2);
+}
+.btn-danger {
+  background: var(--danger-light);
+  color: var(--danger);
+  border: 1px solid #f5c6c2;
+}
+.btn-danger:hover {
+  background: #f9d5d2;
+}
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 12px;
+}
+.btn-icon {
+  padding: 8px;
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.card-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--surface2);
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text2);
+}
+.card-body {
+  padding: 24px;
+}
+
+/* Form Elements */
+.form-row {
+  margin-bottom: 20px;
+}
+.form-row label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+.form-row input,
+.form-row select,
+.form-row textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(15,92,74,0.1);
+}
+.form-row textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+/* Events Grid */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+  margin-top: 8px;
+}
+.event-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.25s;
+}
+.event-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+.event-header {
+  padding: 16px 20px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.event-name {
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--primary);
+  line-height: 1.3;
+}
+.event-date {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  margin-top: 4px;
+}
+.event-badge {
+  background: var(--primary-light);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+.event-desc {
+  padding: 12px 20px;
+  font-size: 12px;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+  background: #fefefc;
+}
+.event-stats {
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: #fafaf8;
+}
+.event-stat {
+  text-align: center;
+  flex: 1;
+}
+.event-stat-value {
+  font-weight: 800;
+  font-size: 18px;
+  font-family: 'DM Mono', monospace;
+  color: var(--primary);
+}
+.event-stat-label {
+  font-size: 9px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+.event-members {
+  max-height: 320px;
+  overflow-y: auto;
+}
+.event-member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.event-member-item:hover {
+  background: var(--surface2);
+}
+.event-member-name {
+  font-weight: 500;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.member-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.event-member-status {
+  padding: 5px 14px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+.status-paid {
+  background: var(--paid-bg);
+  color: var(--paid);
+}
+.status-unpaid {
+  background: var(--unpaid-bg);
+  color: var(--text3);
+}
+.event-footer {
+  padding: 14px 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
+.event-total {
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: var(--primary);
+  font-weight: 600;
+}
+.event-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--text3);
+}
+.empty-state .icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+.empty-state h3 {
+  font-size: 18px;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+.empty-state p {
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 30, 25, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open {
+  display: flex;
+}
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlide 0.2s ease;
+}
+@keyframes modalSlide {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text2);
+  transition: background 0.15s;
+}
+.modal-close:hover {
+  background: var(--border);
+}
+.modal-body {
+  padding: 24px;
+}
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--text);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastIn 0.25s ease;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Mobile hamburger */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--primary);
+  font-size: 22px;
+}
+
+/* Sidebar overlay for mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 99;
+}
+.sidebar-overlay.open {
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 240px;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .main {
+    margin-left: 0;
+  }
+  .topbar {
+    padding: 12px 16px;
+  }
+  .content {
+    padding: 16px;
+  }
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+  .hamburger {
+    display: block;
+  }
+  #summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="org-tag">Mkoba Family · TPB</div>
+      <h1>Michango Events</h1>
+      <div class="group-type">Group Contribution Tracker</div>
+    </div>
+    <nav>
+      <a class="nav-item" href="dashboard.html">
+        <span class="icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" href="members.html">
+        <span class="icon">👥</span>
+        <span>Members</span>
+      </a>
+     
+      <a class="nav-item active" href="michango.html">
+        <span class="icon">🎯</span>
+        <span>Michango Events</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div>© 2026 Michango System</div>
+      <div style="margin-top: 4px;">v2.0 · 10,000 TSH/event</div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <div>
+          <div class="topbar-title" id="topbar-title">Michango Events</div>
+          <div class="topbar-sub" id="topbar-sub">Create and track special contributions</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" id="topbar-action-btn" onclick="openCreateEventModal()">
+          <span>➕</span> Create Event
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Events Tab -->
+      <div id="events-tab">
+        <div id="summary-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px;">
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-body" style="text-align: center; padding: 20px;">
+              <div style="font-size: 28px; font-weight: 800; color: var(--primary);" id="total-events">0</div>
+              <div style="font-size: 11px; color: var(--text3); margin-top: 4px;">TOTAL EVENTS</div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-body" style="text-align: center; padding: 20px;">
+              <div style="font-size: 28px; font-weight: 800; color: var(--primary);" id="total-collected">TZS 0</div>
+              <div style="font-size: 11px; color: var(--text3); margin-top: 4px;">TOTAL COLLECTED</div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-body" style="text-align: center; padding: 20px;">
+              <div style="font-size: 28px; font-weight: 800; color: var(--primary);" id="avg-completion">0%</div>
+              <div style="font-size: 11px; color: var(--text3); margin-top: 4px;">AVG COMPLETION</div>
+            </div>
+          </div>
+        </div>
+        <div id="events-container"></div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<!-- Create Event Modal -->
+<div class="modal-overlay" id="create-event-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🎉 Create Michango Event</span>
+      <button class="modal-close" onclick="closeModal('create-event-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>Event Name *</label>
+        <input type="text" id="event-name" placeholder="e.g., Wedding Contribution, Funeral Support" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <label>Description (optional)</label>
+        <textarea id="event-desc" rows="2" placeholder="Additional details about this event..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>Contribution Amount per Member</label>
+        <input type="number" id="event-amount" value="10000" step="1000" style="background: var(--surface2); font-weight: 600;">
+        <small style="display: block; margin-top: 6px; color: var(--text3);">TZS 10,000 (standard contribution)</small>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('create-event-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createMichangoEvent()">Create Event</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const PER_PERIOD = 10000;
+let members = [];
+let events = [];
+
+function loadData() {
+  try {
+    const savedMembers = localStorage.getItem('michango_members');
+    members = savedMembers ? JSON.parse(savedMembers) : [
+      { id: 1,  name: 'SAMSON MUHERE',    phone: '255758347960', role: 'TREASURER' },
+      { id: 2,  name: 'ELIZABETH CHACHA', phone: '255740961710', role: 'MEMBER' },
+      { id: 3,  name: 'MICHAEL MAGORI',   phone: '255761730049', role: 'MEMBER' },
+      { id: 4,  name: 'ANNA NYAHILI',     phone: '255769285513', role: 'MEMBER' },
+      { id: 5,  name: 'GAILUAKA ROBERT',  phone: '255791804931', role: 'MEMBER' },
+      { id: 6,  name: 'ELIZA MUJASI',     phone: '255750704730', role: 'CHAIRPERSON' },
+      { id: 7,  name: 'DOROTHEA JOHN',    phone: '255741615337', role: 'MEMBER' },
+      { id: 8,  name: 'ELIZABETH JAMES',  phone: '255742014558', role: 'MEMBER' },
+      { id: 9,  name: 'LUCAS KOROSO',     phone: '255748350070', role: 'MEMBER' },
+      { id: 10, name: 'AGNES MSETI',      phone: '255754620070', role: 'MEMBER' },
+      { id: 11, name: 'JUDITH MARUA',     phone: '255758344646', role: 'MEMBER' },
+      { id: 12, name: 'EMMANUEL MATIKO',  phone: '255769418292', role: 'MEMBER' },
+      { id: 13, name: 'NANCY SIMON',      phone: '255798238344', role: 'MEMBER' }
+    ];
+
+    const savedEvents = localStorage.getItem('michango_events');
+    events = savedEvents ? JSON.parse(savedEvents) : [];
+  } catch (e) {
+    console.error('Error loading data:', e);
+    members = [];
+    events = [];
+  }
+}
+
+function saveMembers() {
+  localStorage.setItem('michango_members', JSON.stringify(members));
+}
+
+function saveEvents() {
+  localStorage.setItem('michango_events', JSON.stringify(events));
+}
+
+function nextId(arr) {
+  return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1;
+}
+
+function fmt(n) {
+  return 'TZS ' + Number(n).toLocaleString();
+}
+
+function getInitials(name) {
+  return name.split(' ').slice(0, 2).map(w => w[0]).join('');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>"']/g, function(m) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+  });
+}
+
+// ========== EVENTS ==========
+function createMichangoEvent() {
+  const name = document.getElementById('event-name').value.trim();
+  if (!name) { toast('Please enter an event name'); return; }
+
+  const desc   = document.getElementById('event-desc').value.trim();
+  const amount = parseInt(document.getElementById('event-amount').value) || PER_PERIOD;
+
+  if (members.length === 0) { toast('No members in group. Please add members first.'); return; }
+
+  const newEvent = {
+    id: nextId(events),
+    name,
+    description: desc,
+    amountPerMember: amount,
+    createdAt: new Date().toISOString(),
+    members: members.map(m => ({ memberId: m.id, name: m.name, paid: false })),
+    totalCollected: 0
+  };
+
+  events.push(newEvent);
+  saveEvents();
+  closeModal('create-event-modal');
+  document.getElementById('event-name').value = '';
+  document.getElementById('event-desc').value = '';
+  renderEvents();
+  updateStats();
+  toast('✅ Event "' + name + '" created with ' + members.length + ' members');
+}
+
+function togglePayment(eventId, memberIndex) {
+  const ev = events.find(e => e.id === eventId);
+  if (!ev) return;
+  ev.members[memberIndex].paid = !ev.members[memberIndex].paid;
+  ev.totalCollected = ev.members.filter(m => m.paid).length * ev.amountPerMember;
+  saveEvents();
+  renderEvents();
+  updateStats();
+  toast(ev.members[memberIndex].paid ? '✓ Marked as PAID' : '○ Marked as UNPAID');
+}
+
+function resetEvent(eventId) {
+  if (!confirm('Reset all payments for this event? All members will be marked as unpaid.')) return;
+  const ev = events.find(e => e.id === eventId);
+  if (ev) {
+    ev.members.forEach(m => m.paid = false);
+    ev.totalCollected = 0;
+    saveEvents();
+    renderEvents();
+    updateStats();
+    toast('All payments reset');
+  }
+}
+
+function deleteEvent(eventId) {
+  if (!confirm('Delete this event permanently? This cannot be undone.')) return;
+  events = events.filter(e => e.id !== eventId);
+  saveEvents();
+  renderEvents();
+  updateStats();
+  toast('Event deleted');
+}
+
+// ========== RENDER ==========
+function renderEvents() {
+  const container = document.getElementById('events-container');
+  if (!container) return;
+
+  if (events.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🎯</div>
+        <h3>No Events Yet</h3>
+        <p>Create your first Michango event to start tracking contributions.</p>
+        <button class="btn btn-primary" onclick="openCreateEventModal()">➕ Create Your First Event</button>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = '<div class="events-grid">' + events.map(ev => {
+    const total   = ev.members.length;
+    const paid    = ev.members.filter(m => m.paid).length;
+    const percent = total > 0 ? (paid / total * 100).toFixed(1) : 0;
+    const target  = total * ev.amountPerMember;
+
+    return `
+      <div class="event-card">
+        <div class="event-header">
+          <div>
+            <div class="event-name">${escapeHtml(ev.name)}</div>
+            <div class="event-date">${new Date(ev.createdAt).toLocaleDateString()}</div>
+          </div>
+          <div class="event-badge">${paid}/${total}</div>
+        </div>
+        ${ev.description ? `<div class="event-desc">📝 ${escapeHtml(ev.description)}</div>` : ''}
+        <div class="event-stats">
+          <div class="event-stat">
+            <div class="event-stat-value" style="font-size:13px;">${fmt(paid * ev.amountPerMember)}</div>
+            <div class="event-stat-label">Collected</div>
+          </div>
+          <div class="event-stat">
+            <div class="event-stat-value" style="font-size:13px;">${fmt(target)}</div>
+            <div class="event-stat-label">Target</div>
+          </div>
+          <div class="event-stat">
+            <div class="event-stat-value">${percent}%</div>
+            <div class="event-stat-label">Progress</div>
+          </div>
+        </div>
+        <div class="event-members">
+          ${ev.members.map((member, idx) => `
+            <div class="event-member-item" onclick="togglePayment(${ev.id}, ${idx})">
+              <span class="event-member-name">
+                <span class="member-avatar">${getInitials(member.name)}</span>
+                ${escapeHtml(member.name)}
+              </span>
+              <span class="event-member-status ${member.paid ? 'status-paid' : 'status-unpaid'}">
+                ${member.paid ? '✓ PAID' : '○ NOT PAID'}
+              </span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="event-footer">
+          <span class="event-total">💰 ${fmt(ev.amountPerMember)} per member</span>
+          <div class="event-actions">
+            <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); resetEvent(${ev.id})">⟳ Reset</button>
+            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteEvent(${ev.id})">🗑 Delete</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('') + '</div>';
+}
+
+
+
+function updateStats() {
+  document.getElementById('total-events').textContent    = events.length;
+  document.getElementById('total-collected').textContent = fmt(events.reduce((s, e) => s + e.totalCollected, 0));
+  const avg = events.length > 0
+    ? events.reduce((s, e) => s + (e.members.filter(m => m.paid).length / Math.max(1, e.members.length) * 100), 0) / events.length
+    : 0;
+  document.getElementById('avg-completion').textContent = Math.round(avg) + '%';
+}
+
+// ========== UI HELPERS ==========
+function openCreateEventModal() {
+  document.getElementById('event-name').value  = '';
+  document.getElementById('event-desc').value  = '';
+  document.getElementById('event-amount').value = '10000';
+  openModal('create-event-modal');
+}
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+function toast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = '<span>' + msg + '</span>';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2500);
+}
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+
+// Init
+loadData();
+renderEvents();
+updateStats();
+</script>
+</body>
+</html>
