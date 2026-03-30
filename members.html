@@ -1,307 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UMOJA WVJ — Members</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --bg: #f5f2ec;
-      --surface: #ffffff;
-      --surface2: #f0ede6;
-      --border: #ddd9d0;
-      --primary: #0f5c4a;
-      --primary-light: #e8f5f1;
-      --primary-mid: #1a7a63;
-      --accent: #e8860a;
-      --danger: #c0392b;
-      --danger-light: #fdecea;
-      --text: #1a1a18;
-      --text2: #5a5a52;
-      --text3: #9a9a90;
-      --shadow: 0 2px 16px rgba(15, 92, 74, 0.08);
-      --shadow-lg: 0 8px 40px rgba(15, 92, 74, 0.14);
-      --radius: 10px;
-      --radius-lg: 16px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      font-size: 14px;
-    }
-
-    .app {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      width: 220px;
-      background: var(--primary);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      z-index: 100;
-      padding: 20px;
-    }
-
-    .sidebar h2 {
-      color: #fff;
-      font-size: 18px;
-      font-weight: 800;
-      margin-bottom: 20px;
-    }
-
-    /* Main */
-    .main {
-      margin-left: 220px;
-      flex: 1;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Topbar */
-    .topbar {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-
-    .topbar-title {
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    /* Content */
-    .content {
-      padding: 24px 28px;
-      flex: 1;
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.15s;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-mid);
-    }
-
-    .btn-danger {
-      background: var(--danger-light);
-      color: var(--danger);
-    }
-
-    .btn-danger:hover {
-      background: #f9d5d2;
-    }
-
-    /* Table */
-    .table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead tr {
-      background: var(--surface2);
-      border-bottom: 2px solid var(--border);
-    }
-
-    th {
-      padding: 12px;
-      text-align: left;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text3);
-    }
-
-    td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    tbody tr:hover {
-      background: var(--surface2);
-    }
-
-    /* Modal */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 30, 25, 0.45);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-overlay.open {
-      display: flex;
-    }
-
-    .modal {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      width: 100%;
-      max-width: 480px;
-      max-height: 90vh;
-      overflow-y: auto;
-      animation: slideUp 0.2s ease;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .modal-header {
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .modal-title {
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .modal-close {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background: var(--surface2);
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text2);
-    }
-
-    .modal-close:hover {
-      background: var(--border);
-    }
-
-    .modal-body {
-      padding: 20px 24px;
-    }
-
-    .modal-footer {
-      padding: 16px 24px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    /* Form */
-    .form-row {
-      margin-bottom: 16px;
-    }
-
-    .form-row label {
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text3);
-      margin-bottom: 6px;
-    }
-
-    .form-row input {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 13px;
-      color: var(--text);
-      background: var(--surface);
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    .form-row input:focus {
-      border-color: var(--primary);
-    }
-
-    @media (max-width: 768px) {
-      .main {
-        margin-left: 0;
-      }
-      .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-      }
-    }
-  </style>
+  <title>UMOJA WVJ — Members</title>
 </head>
 
 <body>
   <div class="app">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <h2>UMOJA WVJ</h2>
+      <div class="sidebar-logo">
+        <div class="org-tag">Mkoba Family · TPB</div>
+        <h1>UMOJA WVJ</h1>
+        <div class="group-type">Group Manager v2.0 · Mar–Feb Cycle</div>
+      </div>
+      <nav>
+        <div class="nav-item" onclick="window.location.href='dashboard.html'"><span class="icon">📊</span>Dashboard</div>
+        <div class="nav-item active" onclick="window.location.href='members.html'"><span class="icon">👥</span>Members</div>
+        <div class="nav-item" onclick="window.location.href='payments.html'"><span class="icon">💳</span>Payments</div>
+        <div class="nav-item" onclick="window.location.href='michango.html'"><span class="icon">🎯</span>Matukio</div>
+      </nav>
+      <div class="sidebar-footer">© 2026 UMOJA WVJ GROUP</div>
     </aside>
 
     <!-- Main -->
@@ -309,8 +30,9 @@
       <div class="topbar">
         <div>
           <div class="topbar-title">Members</div>
+          <div class="topbar-sub">All group members</div>
         </div>
-        <div>
+        <div class="topbar-actions">
           <button class="btn btn-primary" onclick="openAddMember()">Add Member</button>
         </div>
       </div>
@@ -334,7 +56,7 @@
     </div>
   </div>
 
-  <!-- MODAL -->
+  <!-- Members Modal -->
   <div class="modal-overlay" id="modal">
     <div class="modal">
       <div class="modal-header">
