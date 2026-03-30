@@ -1,154 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UMOJA WVJ — Members</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UMOJA WVJ — Members</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #f5f2ec;
+      --surface: #ffffff;
+      --surface2: #f0ede6;
+      --border: #ddd9d0;
+      --primary: #0f5c4a;
+      --primary-light: #e8f5f1;
+      --primary-mid: #1a7a63;
+      --accent: #e8860a;
+      --danger: #c0392b;
+      --danger-light: #fdecea;
+      --text: #1a1a18;
+      --text2: #5a5a52;
+      --text3: #9a9a90;
+      --shadow: 0 2px 16px rgba(15, 92, 74, 0.08);
+      --shadow-lg: 0 8px 40px rgba(15, 92, 74, 0.14);
+      --radius: 10px;
+      --radius-lg: 16px;
+    }
 
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+    }
 
-<script>
-const SUPABASE_URL = 'https://usrslbegigknkookofvr.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_3bSO7Ux9XJZC-zsJ9ly3EA_ipIL0sNJ';
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
 
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: var(--primary);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      padding: 20px;
+    }
 
-<style>
-    <link rel="stylesheet" href="styles.css">
-body{font-family:'Plus Jakarta Sans';margin:0;background:#f5f2ec}
-.app{display:flex}
-.sidebar{width:220px;background:#0f5c4a;color:#fff;height:100vh;position:fixed;padding:20px}
-.main{margin-left:220px;width:100%}
-.topbar{background:#fff;padding:15px 20px;border-bottom:1px solid #ddd}
-.content{padding:20px}
-.btn{padding:8px 12px;border:none;border-radius:6px;cursor:pointer}
-.btn-primary{background:#0f5c4a;color:#fff}
-.table-wrap{background:#fff;border-radius:10px;overflow:hidden}
-table{width:100%;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid #eee}
-</style>
+    .sidebar h2 {
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    /* Main */
+    .main {
+      margin-left: 220px;
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Topbar */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* Content */
+    .content {
+      padding: 24px 28px;
+      flex: 1;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-mid);
+    }
+
+    .btn-danger {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: #f9d5d2;
+    }
+
+    /* Table */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: var(--surface2);
+      border-bottom: 2px solid var(--border);
+    }
+
+    th {
+      padding: 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text3);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr:hover {
+      background: var(--surface2);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 30, 25, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.2s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: var(--surface2);
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text2);
+    }
+
+    .modal-close:hover {
+      background: var(--border);
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* Form */
+    .form-row {
+      margin-bottom: 16px;
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text3);
+      margin-bottom: 6px;
+    }
+
+    .form-row input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-row input:focus {
+      border-color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+      .main {
+        margin-left: 0;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>UMOJA WVJ</h2>
+    </aside>
 
-<div class="app">
-<div class="sidebar">
-<h2>UMOJA WVJ</h2>
-</div>
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <div class="topbar-title">Members</div>
+        </div>
+        <div>
+          <button class="btn btn-primary" onclick="openAddMember()">Add Member</button>
+        </div>
+      </div>
 
-<div class="main">
-<div class="topbar">
-<button class="btn btn-primary" onclick="openAddMember()">Add Member</button>
-</div>
+      <div class="content">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Deposit</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="members-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div class="content">
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Name</th>
-<th>Phone</th>
-<th>Deposit</th>
-<th>Actions</th>
-</tr>
-</thead>
-<tbody id="members-tbody"></tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title">Add Member</span>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>Full Name</label>
+          <input type="text" id="name" placeholder="JOHN DOE">
+        </div>
+        <div class="form-row">
+          <label>Phone Number</label>
+          <input type="text" id="phone" placeholder="255XXXXXXXXX">
+        </div>
+        <div class="form-row">
+          <label>Total Deposit (TZS)</label>
+          <input type="number" id="deposit" placeholder="0" min="0" step="1000">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="saveMember()">Save Member</button>
+        <button class="btn" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
 
-<!-- MODAL -->
-<div id="modal" style="display:none;position:fixed;inset:0;background:#0005;align-items:center;justify-content:center">
-<div style="background:#fff;padding:20px;border-radius:10px;width:300px">
-<h3>Add Member</h3>
-<input id="name" placeholder="Name"><br><br>
-<input id="phone" placeholder="Phone"><br><br>
-<input id="deposit" type="number" placeholder="Deposit"><br><br>
-<button class="btn btn-primary" onclick="saveMember()">Save</button>
-<button onclick="closeModal()">Cancel</button>
-</div>
-</div>
+  <script>
+    const SUPABASE_URL = 'https://usrslbegigknkookofvr.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_3bSO7Ux9XJZC-zsJ9ly3EA_ipIL0sNJ';
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-<script>
-let editingId = null;
+    let editingId = null;
 
-async function loadMembers(){
-const {data,error} = await supabaseClient.from('members').select('*');
-if(error){console.error(error);return [];}
-return data;
-}
+    async function loadMembers() {
+      const { data, error } = await supabaseClient.from('members').select('*');
+      if (error) {
+        console.error(error);
+        return [];
+      }
+      return data;
+    }
 
-async function render(){
-const list = await loadMembers();
-const tbody = document.getElementById('members-tbody');
+    async function render() {
+      const list = await loadMembers();
+      const tbody = document.getElementById('members-tbody');
 
-tbody.innerHTML = list.map((m,i)=>`
-<tr>
-<td>${i+1}</td>
-<td>${m.name}</td>
-<td>${m.phone}</td>
-<td>${m.total_deposit}</td>
-<td>
-<button onclick="edit(${m.id})">Edit</button>
-<button onclick="del(${m.id})">Delete</button>
-</td>
-</tr>
-`).join('');
-}
+      tbody.innerHTML = list.map((m, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${m.name}</td>
+          <td>${m.phone}</td>
+          <td>${m.total_deposit}</td>
+          <td>
+            <button class="btn" onclick="edit(${m.id})">Edit</button>
+            <button class="btn btn-danger" onclick="del(${m.id})">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
 
-function openAddMember(){
-editingId=null;
-document.getElementById('modal').style.display='flex';
-}
+    function openAddMember() {
+      editingId = null;
+      document.getElementById('modal-title').textContent = 'Add Member';
+      document.getElementById('modal').classList.add('open');
+      document.getElementById('name').value = '';
+      document.getElementById('phone').value = '';
+      document.getElementById('deposit').value = '';
+    }
 
-function closeModal(){
-document.getElementById('modal').style.display='none';
-}
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+    }
 
-async function saveMember(){
-const name=document.getElementById('name').value;
-const phone=document.getElementById('phone').value;
-const deposit=parseInt(document.getElementById('deposit').value)||0;
+    async function saveMember() {
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const deposit = parseInt(document.getElementById('deposit').value) || 0;
 
-if(editingId){
-await supabaseClient.from('members')
-.update({name,phone,total_deposit:deposit})
-.eq('id',editingId);
-}else{
-await supabaseClient.from('members')
-.insert([{name,phone,total_deposit:deposit}]);
-}
+      if (editingId) {
+        await supabaseClient.from('members')
+          .update({ name, phone, total_deposit: deposit })
+          .eq('id', editingId);
+      } else {
+        await supabaseClient.from('members')
+          .insert([{ name, phone, total_deposit: deposit }]);
+      }
 
-closeModal();
-render();
-}
+      closeModal();
+      render();
+    }
 
-async function edit(id){
-const list = await loadMembers();
-const m = list.find(x=>x.id===id);
+    async function edit(id) {
+      const list = await loadMembers();
+      const m = list.find(x => x.id === id);
 
-editingId=id;
-document.getElementById('name').value=m.name;
-document.getElementById('phone').value=m.phone;
-document.getElementById('deposit').value=m.total_deposit;
+      editingId = id;
+      document.getElementById('modal-title').textContent = 'Edit Member';
+      document.getElementById('name').value = m.name;
+      document.getElementById('phone').value = m.phone;
+      document.getElementById('deposit').value = m.total_deposit;
 
-openAddMember();
-}
+      openAddMember();
+    }
 
-async function del(id){
-await supabaseClient.from('members').delete().eq('id',id);
-render();
-}
+    async function del(id) {
+      if (confirm('Are you sure you want to delete this member?')) {
+        await supabaseClient.from('members').delete().eq('id', id);
+        render();
+      }
+    }
 
-window.onload=render;
-</script>
-
+    window.onload = render;
+  </script>
 </body>
 </html>
